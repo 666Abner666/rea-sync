@@ -1,6 +1,8 @@
 name: Sync REA upstream
 
 on:
+  schedule:
+    - cron: "37 */6 * * *"
   workflow_dispatch:
 
 # The controller's built-in token has no repository permissions.
