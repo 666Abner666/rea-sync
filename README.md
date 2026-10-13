@@ -15,6 +15,6 @@ Add the Actions repository secret `REA_SYNC_TOKEN` in **this controller reposito
 Use a bounded expiration (for example 90 days) and replace the secret before expiry. Expiry, revocation, merge conflicts, or repository policy changes can stop synchronization.
 
 ## Status and operation
-The workflow is currently manual-only while initial credential setup and verification are pending. After a successful test it will be scheduled every 6 hours at minute 37 (UTC).
+The workflow runs every 6 hours at 00:37, 06:37, 12:37, and 18:37 UTC, and supports manual dispatch. Initial live verification succeeded on 2026-10-13: [run #1](https://github.com/666Abner666/rea-sync/actions/runs/38415341900).
 
 GitHub can delay scheduled jobs and may disable scheduled workflows in a public repository after 60 days without repository activity. Check the Actions page periodically and re-enable the schedule if GitHub disables it.
