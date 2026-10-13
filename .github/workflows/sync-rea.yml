@@ -1,0 +1,41 @@
+name: Sync REA upstream
+
+on:
+  workflow_dispatch:
+
+# The controller's built-in token has no repository permissions.
+# The separately stored fine-grained token can write only 666Abner666/rea.
+permissions: {}
+
+concurrency:
+  group: rea-upstream-main
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.repository == '666Abner666/rea-sync' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ secrets.REA_SYNC_TOKEN }}
+      TARGET_REPOSITORY: 666Abner666/rea
+    steps:
+      - name: Verify destination and merge upstream
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$GH_TOKEN" ]]; then
+            echo "::error::REA_SYNC_TOKEN is missing. Add the repository-scoped secret before running."
+            exit 1
+          fi
+          parent="$(gh api "repos/${TARGET_REPOSITORY}" --jq '.parent.full_name')"
+          if [[ "$parent" != "morluto/rea" ]]; then
+            echo "::error::Unexpected upstream repository; refusing to synchronize."
+            exit 1
+          fi
+          # API merge preserves fork-only commits and refuses merge conflicts.
+          # No checkout, install, build, force-push, or upstream code execution.
+          gh api --method POST "repos/${TARGET_REPOSITORY}/merge-upstream" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -f branch=main --jq '.message' | tee -a "$GITHUB_STEP_SUMMARY"
